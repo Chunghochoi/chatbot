@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chào mừng - Chatbot kép</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="welcome-screen">
+  <div class="welcome-box">
+    <h1>🤖 Chatbot kép</h1>
+    <p>Chọn cách bạn muốn sử dụng:</p>
+
+    <div class="choice-box">
+      <input type="password" id="passwordInput" placeholder="🔑 Nhập mật khẩu để vào bot riêng tư">
+      <button onclick="enterPrivate()">Vào Bot Riêng tư</button>
+    </div>
+
+    <div class="divider">hoặc</div>
+
+    <button class="guest-btn" onclick="enterGuest()">👤 Dùng với tư cách khách</button>
+  </div>
+
+  <script>
+    function enterPrivate() {
+      const pwd = document.getElementById("passwordInput").value;
+      if (pwd === "matkhau123") { // 🔐 mật khẩu bạn tự đặt
+        window.location.href = "chat.html?mode=persona";
+      } else {
+        alert("Sai mật khẩu!");
+      }
+    }
+
+    function enterGuest() {
+      window.location.href = "chat.html?mode=guest";
+    }
+  </script>
+</body>
+</html>
