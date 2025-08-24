@@ -126,12 +126,4 @@
       }
     ]
   }
-}{
-  "name": "gemini-chatbot-advanced",
-  "version": "2.0.0",
-  "description": "Advanced AI Chatbot với Gemini 2.0 Flash - Real-time streaming, multimodal AI, và offline support",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "build": "npm run build:css && npm run build:js",
+}
