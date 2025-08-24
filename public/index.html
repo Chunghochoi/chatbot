@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dev Chatbot | AI Assistant</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -25,6 +26,8 @@
             --neon-blue: #00d4ff;
             --neon-purple: #8b5cf6;
             --terminal-green: #00ff41;
+            --danger: #ff4757;
+            --warning: #ffa502;
         }
 
         body {
@@ -238,9 +241,104 @@
         .chat-screen {
             height: 100vh;
             display: flex;
-            flex-direction: column;
             position: relative;
             z-index: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            opacity: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .new-chat-btn {
+            padding: 8px 12px;
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .history-item {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--neon-blue);
+        }
+
+        .history-item.active {
+            background: var(--success-gradient);
+            color: var(--text-light);
+        }
+
+        .history-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Main Chat Area */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .chat-header {
@@ -296,15 +394,6 @@
             transform: scale(1.05);
         }
 
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
         .chat-messages {
             flex: 1;
             padding: 24px;
@@ -357,6 +446,34 @@
             border-radius: 50%;
         }
 
+        .message-content {
+            line-height: 1.6;
+        }
+
+        .message-attachments {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .attachment-item {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .attachment-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
         .typing-indicator {
             display: none;
             align-self: flex-start;
@@ -406,9 +523,14 @@
             position: relative;
         }
 
-        .message-input {
+        .input-wrapper {
             flex: 1;
-            padding: 16px 24px;
+            position: relative;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 16px 60px 16px 24px;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid transparent;
             border-radius: 24px;
@@ -416,6 +538,9 @@
             font-size: 1rem;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            resize: none;
+            max-height: 120px;
+            min-height: 56px;
         }
 
         .message-input:focus {
@@ -427,6 +552,30 @@
 
         .message-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .attach-btn {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .attach-btn:hover {
+            background: var(--neon-blue);
+            transform: scale(1.1);
         }
 
         .send-btn {
@@ -454,31 +603,87 @@
             transform: none;
         }
 
+        /* File input */
+        .file-input {
+            display: none;
+        }
+
+        /* Upload area */
+        .upload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .upload-area {
+            padding: 40px;
+            border: 2px dashed var(--neon-blue);
+            border-radius: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--neon-blue);
+        }
+
         /* Scrollbar styling */
-        .chat-messages::-webkit-scrollbar {
+        .chat-messages::-webkit-scrollbar,
+        .chat-history::-webkit-scrollbar {
             width: 8px;
         }
 
-        .chat-messages::-webkit-scrollbar-track {
+        .chat-messages::-webkit-scrollbar-track,
+        .chat-history::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             margin: 10px 0;
         }
 
-        .chat-messages::-webkit-scrollbar-thumb {
+        .chat-messages::-webkit-scrollbar-thumb,
+        .chat-history::-webkit-scrollbar-thumb {
             background: var(--neon-blue);
             border-radius: 10px;
             transition: all 0.3s ease;
         }
 
-        .chat-messages::-webkit-scrollbar-thumb:hover {
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .chat-history::-webkit-scrollbar-thumb:hover {
             background: var(--neon-purple);
         }
 
         /* Firefox scrollbar */
-        .chat-messages {
+        .chat-messages,
+        .chat-history {
             scrollbar-width: thin;
             scrollbar-color: var(--neon-blue) rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile toggle button */
+        .mobile-toggle {
+            display: none;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* Dark/Light theme toggle */
@@ -490,6 +695,25 @@
         .theme-light .welcome-container::after,
         .theme-light .divider span {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            background: var(--success-gradient);
+            color: var(--text-light);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
         }
 
         /* Mobile responsiveness */
@@ -505,6 +729,38 @@
 
             .logo {
                 font-size: 3rem;
+            }
+
+            .chat-screen {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 100;
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar.collapsed {
+                width: 280px;
+                opacity: 1;
+                transform: translateX(-100%);
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .main-chat {
+                width: 100%;
             }
 
             .message {
@@ -527,11 +783,26 @@
             .chat-title {
                 font-size: 1.2rem;
             }
+
+            .message-input {
+                padding: 12px 50px 12px 16px;
+            }
         }
 
         /* Hide scrollbar for welcome screen */
         .welcome-screen::-webkit-scrollbar {
             display: none;
+        }
+
+        /* Shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -541,7 +812,7 @@
 
     <!-- Welcome Screen -->
     <div class="welcome-container" id="welcomeScreen">
-        <div class="logo">🚀</div>
+        <div class="logo">🤖</div>
         <h1 class="welcome-title">Dev Chatbot</h1>
         <p class="welcome-subtitle">Trợ lý AI thông minh dành cho developers. Chọn cách truy cập phù hợp với bạn.</p>
         
@@ -571,29 +842,54 @@
 
     <!-- Chat Screen (initially hidden) -->
     <div class="chat-screen" id="chatScreen" style="display: none;">
-        <div class="chat-header">
-            <div class="chat-title">
-                <div class="status-indicator"></div>
-                <span id="chatTitle">💬 Chatbot</span>
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fas fa-history"></i>
+                    Lịch sử
+                </div>
+                <button class="new-chat-btn" onclick="newChat()">
+                    <i class="fas fa-plus"></i> Mới
+                </button>
             </div>
-            <div class="header-actions">
-                <button class="action-btn" onclick="toggleTheme()" title="Đổi giao diện">
-                    <i class="fas fa-moon" id="themeIcon"></i>
-                </button>
-                <button class="action-btn" onclick="clearChat()" title="Xóa cuộc trò chuyện">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button class="action-btn" onclick="goBack()" title="Quay lại">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
+            <div class="chat-history" id="chatHistory">
+                <!-- History items will be added here -->
             </div>
         </div>
 
-        <div class="chat-container">
+        <!-- Main Chat Area -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <button class="mobile-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="status-indicator"></div>
+                    <span id="chatTitle">💬 Chatbot</span>
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn" onclick="toggleTheme()" title="Đổi giao diện">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <button class="action-btn" onclick="clearChat()" title="Xóa cuộc trò chuyện">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="action-btn" onclick="newChat()" title="Trò chuyện mới">
+                        <i class="fas fa-refresh"></i>
+                    </button>
+                    <button class="action-btn" onclick="goBack()" title="Quay lại">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
             <div class="chat-messages" id="chatMessages">
                 <div class="message bot">
-                    <strong>🤖 AI Assistant:</strong> Chào mừng bạn! Tôi là trợ lý AI của các developers. 
-                    Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc những gì bạn cần hỗ trợ! ⚡
+                    <div class="message-content">
+                        <strong>🤖 AI Assistant:</strong> Chào mừng bạn! Tôi là trợ lý AI của các developers. 
+                        Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc gửi ảnh/file để tôi phân tích! ⚡
+                    </div>
                 </div>
             </div>
 
@@ -604,225 +900,49 @@
                     <div class="dot"></div>
                 </div>
             </div>
-        </div>
 
-        <div class="chat-input-container">
-            <div class="chat-input">
-                <input 
-                    type="text" 
-                    class="message-input" 
-                    id="messageInput" 
-                    placeholder="Nhập tin nhắn... (Enter để gửi)"
-                    onkeypress="handleKeyPress(event)"
-                >
-                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <div class="chat-input-container">
+                <div class="chat-input">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                            rows="1"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button class="attach-btn" onclick="triggerFileInput()" title="Đính kèm file">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="attach-btn" onclick="triggerImageInput()" title="Đính kèm ảnh">
+                                <i class="fas fa-image"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- File inputs -->
+    <input type="file" id="fileInput" class="file-input" multiple accept=".txt,.pdf,.doc,.docx,.json,.js,.py,.html,.css" onchange="handleFileSelect(event)">
+    <input type="file" id="imageInput" class="file-input" multiple accept="image/*" onchange="handleImageSelect(event)">
+
+    <!-- Upload overlay -->
+    <div class="upload-overlay" id="uploadOverlay">
+        <div class="upload-area">
+            <div class="upload-icon">📁</div>
+            <h3>Thả file vào đây</h3>
+            <p>Hỗ trợ: Ảnh, Text, PDF, Code files</p>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
     <script>
         // Global variables
-        const GEMINI_API_KEY = "AIzaSyDtovOnKqGNYdamLaVDlp3UYDSFfnD2fbk";
-        const MODEL = "gemini-1.5-flash";
-        let currentMode = "guest";
-        let theme = "dark";
-
-        // Create animated particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.width = Math.random() * 4 + 2 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Initialize particles
-        createParticles();
-
-        // Authentication functions
-        function enterPrivate() {
-            const password = document.getElementById("passwordInput").value;
-            if (password === "12345") { // Using password from .env
-                currentMode = "persona";
-                showChatScreen();
-                document.getElementById("chatTitle").innerHTML = '<i class="fas fa-lock"></i> Bot Riêng tư';
-            } else {
-                showErrorAnimation();
-                setTimeout(() => {
-                    alert("❌ Mật khẩu không chính xác!");
-                }, 300);
-            }
-        }
-
-        function enterGuest() {
-            currentMode = "guest";
-            showChatScreen();
-            document.getElementById("chatTitle").innerHTML = '<i class="fas fa-user"></i> Bot Công khai';
-        }
-
-        // Screen transition
-        function showChatScreen() {
-            document.getElementById("welcomeScreen").style.display = "none";
-            document.getElementById("chatScreen").style.display = "flex";
-            document.getElementById("mainBody").className = "chat-screen";
-            document.getElementById("messageInput").focus();
-        }
-
-        function goBack() {
-            document.getElementById("welcomeScreen").style.display = "flex";
-            document.getElementById("chatScreen").style.display = "none";
-            document.getElementById("mainBody").className = "welcome-screen";
-            document.getElementById("passwordInput").value = "";
-        }
-
-        // Error animation
-        function showErrorAnimation() {
-            const passwordInput = document.getElementById("passwordInput");
-            passwordInput.style.animation = "shake 0.5s ease-in-out";
-            passwordInput.style.borderColor = "#ff4757";
-            setTimeout(() => {
-                passwordInput.style.animation = "";
-                passwordInput.style.borderColor = "transparent";
-            }, 500);
-        }
-
-        // Theme toggle
-        function toggleTheme() {
-            theme = theme === "dark" ? "light" : "dark";
-            const body = document.getElementById("mainBody");
-            const themeIcon = document.getElementById("themeIcon");
-            
-            if (theme === "light") {
-                body.classList.add("theme-light");
-                themeIcon.className = "fas fa-sun";
-            } else {
-                body.classList.remove("theme-light");
-                themeIcon.className = "fas fa-moon";
-            }
-        }
-
-        // Clear chat
-        function clearChat() {
-            const chatMessages = document.getElementById("chatMessages");
-            chatMessages.innerHTML = `
-                <div class="message bot">
-                    <strong>🤖 AI Assistant:</strong> Cuộc trò chuyện đã được xóa. 
-                    Hãy bắt đầu câu hỏi mới! ✨
-                </div>
-            `;
-        }
-
-        // Handle Enter key
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-
-        // Show typing indicator
-        function showTyping() {
-            document.getElementById("typingIndicator").style.display = "block";
-            const chatMessages = document.getElementById("chatMessages");
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function hideTyping() {
-            document.getElementById("typingIndicator").style.display = "none";
-        }
-
-        // Send message function
-        async function sendMessage() {
-            const messageInput = document.getElementById("messageInput");
-            const message = messageInput.value.trim();
-            
-            if (!message) return;
-
-            const chatMessages = document.getElementById("chatMessages");
-            const sendBtn = document.getElementById("sendBtn");
-
-            // Add user message
-            const userMessage = document.createElement("div");
-            userMessage.className = "message user";
-            userMessage.innerHTML = `<strong>You:</strong> ${message}`;
-            chatMessages.appendChild(userMessage);
-
-            // Clear input and disable send button
-            messageInput.value = "";
-            sendBtn.disabled = true;
-            showTyping();
-
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            contents: [{ 
-                                role: "user", 
-                                parts: [{ text: message }] 
-                            }]
-                        })
-                    }
-                );
-
-                const data = await response.json();
-                let botReply = "⚠️ Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.";
-                
-                if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    botReply = data.candidates[0].content.parts[0].text;
-                }
-
-                hideTyping();
-
-                const botMessage = document.createElement("div");
-                botMessage.className = "message bot";
-                botMessage.innerHTML = `<strong>🤖 AI:</strong> ${botReply}`;
-                chatMessages.appendChild(botMessage);
-
-            } catch (error) {
-                console.error("API Error:", error);
-                hideTyping();
-
-                const errorMessage = document.createElement("div");
-                errorMessage.className = "message bot";
-                errorMessage.innerHTML = `<strong>🤖 AI:</strong> ❌ Xin lỗi, đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại sau.`;
-                chatMessages.appendChild(errorMessage);
-            } finally {
-                sendBtn.disabled = false;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                messageInput.focus();
-            }
-        }
-
-        // Add shake animation for errors
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Auto-focus on password input
-            document.getElementById('passwordInput').focus();
-        });
-    </script>
-</body>
-</html>
+        const GEMINI_API_KEY = "AIzaSyDtovOnKqGN
