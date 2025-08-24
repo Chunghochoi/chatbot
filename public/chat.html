@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot kép</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="chat-screen">
+  <div class="chat-header">
+    <h2 id="chatTitle">💬 Chatbot</h2>
+    <a href="login.html" class="logout-btn">↩ Quay lại</a>
+  </div>
+
+  <div id="chatWindow" class="chat-window">
+    <div class="message bot">Chào bạn! Có gì mình có thể giúp bạn không ạ?</div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Nhập tin nhắn...">
+    <button onclick="sendMessage()">Gửi</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode") || "guest"; // mặc định khách
+    const chatTitle = document.getElementById("chatTitle");
+
+    if (mode === "persona") {
+      chatTitle.textContent = "🔒 Chatbot Riêng tư";
+      document.body.classList.add("persona-mode");
+    } else {
+      chatTitle.textContent = "👤 Chatbot Khách";
+      document.body.classList.add("guest-mode");
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("userInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatWindow = document.getElementById("chatWindow");
+
+      // hiển thị user message
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user";
+      userMsg.textContent = text;
+      chatWindow.appendChild(userMsg);
+
+      input.value = "";
+
+      // fake bot reply (có thể đổi sang API call Gemini hoặc GPT)
+      setTimeout(() => {
+        const botMsg = document.createElement("div");
+        botMsg.className = "message bot";
+        if (mode === "persona") {
+          botMsg.textContent = `🤖 [Riêng tư] Bạn vừa nói: "${text}"`;
+        } else {
+          botMsg.textContent = `👤 [Khách] Bạn vừa nói: "${text}"`;
+        }
+        chatWindow.appendChild(botMsg);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }, 800);
+    }
+  </script>
+</body>
+</html>
