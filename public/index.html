@@ -30,12 +30,16 @@
             --warning: #ffa502;
         }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
             background: var(--dark-gradient);
             color: var(--text-light);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
             position: relative;
         }
 
@@ -69,6 +73,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            width: 100vw;
             position: relative;
             z-index: 1;
         }
@@ -237,29 +242,33 @@
             padding: 0 1rem;
         }
 
-        /* Chat Screen */
+        /* Chat Screen - FIXED LAYOUT */
         .chat-screen {
             height: 100vh;
+            width: 100vw;
             display: flex;
             position: relative;
             z-index: 1;
+            overflow: hidden;
         }
 
         /* Sidebar */
         .sidebar {
             width: 320px;
+            height: 100vh;
             backdrop-filter: blur(20px);
             background: var(--glass-bg);
             border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
-            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .sidebar.collapsed {
             width: 0;
             opacity: 0;
+            overflow: hidden;
         }
 
         .sidebar-header {
@@ -268,6 +277,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .sidebar-title {
@@ -334,11 +344,13 @@
             opacity: 0.7;
         }
 
-        /* Main Chat Area */
+        /* Main Chat Area - FIXED */
         .main-chat {
             flex: 1;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            min-width: 0; /* Important for flex shrinking */
         }
 
         .chat-header {
@@ -349,6 +361,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .chat-title {
@@ -394,6 +407,7 @@
             transform: scale(1.05);
         }
 
+        /* FIXED CHAT MESSAGES CONTAINER */
         .chat-messages {
             flex: 1;
             padding: 24px;
@@ -401,8 +415,8 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            max-height: calc(100vh - 200px);
-            min-height: 400px;
+            /* Remove max-height and min-height constraints */
+            /* Let it take remaining space naturally */
         }
 
         .message {
@@ -482,6 +496,7 @@
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             border-bottom-left-radius: 8px;
+            flex-shrink: 0;
         }
 
         .typing-dots {
@@ -510,9 +525,7 @@
             backdrop-filter: blur(20px);
             background: var(--glass-bg);
             border-top: 1px solid var(--glass-border);
-            position: sticky;
-            bottom: 0;
-            z-index: 10;
+            flex-shrink: 0;
         }
 
         .chat-input {
@@ -769,7 +782,6 @@
 
             .chat-messages {
                 padding: 16px;
-                max-height: calc(100vh - 180px);
             }
 
             .chat-input-container {
@@ -1139,14 +1151,13 @@
 
         // Chat history management
         function loadChatHistory() {
-            const stored = localStorage.getItem('chatHistory');
-            if (stored) {
-                chatHistory = JSON.parse(stored);
-            }
+            // Skip localStorage since we can't use it in artifacts
+            chatHistory = [];
         }
 
         function saveChatHistory() {
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            // Skip localStorage since we can't use it in artifacts
+            // In a real environment, you would save to localStorage
         }
 
         function updateChatHistoryUI() {
