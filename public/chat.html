@@ -23,7 +23,7 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode") || "guest"; // mặc định khách
+    const mode = params.get("mode") || "guest"; 
     const chatTitle = document.getElementById("chatTitle");
 
     if (mode === "persona") {
@@ -34,7 +34,10 @@
       document.body.classList.add("guest-mode");
     }
 
-    function sendMessage() {
+    const GEMINI_API_KEY = "AIzaSyDtovOnKqGNYdamLaVDlp3UYDSFfnD2fbk"; 
+    const MODEL = "gemini-1.5-flash"; 
+
+    async function sendMessage() {
       const input = document.getElementById("userInput");
       const text = input.value.trim();
       if (!text) return;
@@ -46,21 +49,41 @@
       userMsg.className = "message user";
       userMsg.textContent = text;
       chatWindow.appendChild(userMsg);
-
       input.value = "";
 
-      // fake bot reply (có thể đổi sang API call Gemini hoặc GPT)
-      setTimeout(() => {
+      // gọi API Gemini
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text }] }]
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        let botReply = "⚠️ Không nhận được phản hồi từ Gemini";
+        if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+          botReply = data.candidates[0].content.parts[0].text;
+        }
+
         const botMsg = document.createElement("div");
         botMsg.className = "message bot";
-        if (mode === "persona") {
-          botMsg.textContent = `🤖 [Riêng tư] Bạn vừa nói: "${text}"`;
-        } else {
-          botMsg.textContent = `👤 [Khách] Bạn vừa nói: "${text}"`;
-        }
+        botMsg.textContent = botReply;
         chatWindow.appendChild(botMsg);
         chatWindow.scrollTop = chatWindow.scrollHeight;
-      }, 800);
+
+      } catch (err) {
+        console.error(err);
+        const botMsg = document.createElement("div");
+        botMsg.className = "message bot";
+        botMsg.textContent = "❌ Lỗi khi gọi API Gemini!";
+        chatWindow.appendChild(botMsg);
+      }
     }
   </script>
 </body>
