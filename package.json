@@ -1,5 +1,5 @@
 {
-  "name": "chatbot-gemini",
+  "name": "chatbot",
   "version": "1.0.0",
   "description": "Chatbot sử dụng Gemini API + persona",
   "main": "server.js",
@@ -17,3 +17,4 @@
     "node": ">=18 <23"
   }
 }
+
