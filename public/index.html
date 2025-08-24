@@ -945,4 +945,587 @@
 
     <script>
         // Global variables
-        const GEMINI_API_KEY = "AIzaSyDtovOnKqGN
+        const GEMINI_API_KEY = "AIzaSyDtovOnKqGNYdamLaVDlp3UYDSFfnD2fbk";
+        const MODEL = "gemini-1.5-flash";
+        let currentMode = "guest";
+        let theme = "dark";
+        let chatHistory = [];
+        let currentChatId = null;
+        let attachedFiles = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadChatHistory();
+            setupDragAndDrop();
+            document.getElementById('passwordInput').focus();
+            
+            // Auto-resize textarea
+            const messageInput = document.getElementById('messageInput');
+            messageInput.addEventListener('input', autoResize);
+        });
+
+        // Create animated particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Auto-resize textarea
+        function autoResize() {
+            const textarea = document.getElementById('messageInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // Authentication functions
+        function enterPrivate() {
+            const password = document.getElementById("passwordInput").value;
+            if (password === "12345") {
+                currentMode = "persona";
+                showChatScreen();
+                document.getElementById("chatTitle").innerHTML = '<i class="fas fa-lock"></i> Bot Riêng tư';
+                showNotification("✅ Đăng nhập thành công vào bot riêng tư!", "success");
+            } else {
+                showErrorAnimation();
+                showNotification("❌ Mật khẩu không chính xác!", "error");
+            }
+        }
+
+        function enterGuest() {
+            currentMode = "guest";
+            showChatScreen();
+            document.getElementById("chatTitle").innerHTML = '<i class="fas fa-user"></i> Bot Công khai';
+            showNotification("👤 Chế độ khách được kích hoạt", "info");
+        }
+
+        // Screen transition with proper cleanup
+        function showChatScreen() {
+            const welcomeScreen = document.getElementById("welcomeScreen");
+            const chatScreen = document.getElementById("chatScreen");
+            const mainBody = document.getElementById("mainBody");
+            
+            // Fade out welcome screen
+            welcomeScreen.style.opacity = "0";
+            welcomeScreen.style.transform = "scale(0.95)";
+            
+            setTimeout(() => {
+                welcomeScreen.style.display = "none";
+                chatScreen.style.display = "flex";
+                mainBody.className = "chat-screen";
+                
+                // Fade in chat screen
+                chatScreen.style.opacity = "0";
+                setTimeout(() => {
+                    chatScreen.style.opacity = "1";
+                    chatScreen.style.transform = "scale(1)";
+                    document.getElementById("messageInput").focus();
+                    newChat(); // Start with a new chat
+                }, 50);
+            }, 300);
+        }
+
+        function goBack() {
+            const welcomeScreen = document.getElementById("welcomeScreen");
+            const chatScreen = document.getElementById("chatScreen");
+            const mainBody = document.getElementById("mainBody");
+            
+            // Fade out chat screen
+            chatScreen.style.opacity = "0";
+            chatScreen.style.transform = "scale(0.95)";
+            
+            setTimeout(() => {
+                chatScreen.style.display = "none";
+                welcomeScreen.style.display = "flex";
+                mainBody.className = "welcome-screen";
+                
+                // Reset form
+                document.getElementById("passwordInput").value = "";
+                
+                // Fade in welcome screen
+                welcomeScreen.style.opacity = "0";
+                setTimeout(() => {
+                    welcomeScreen.style.opacity = "1";
+                    welcomeScreen.style.transform = "scale(1)";
+                    document.getElementById("passwordInput").focus();
+                }, 50);
+            }, 300);
+        }
+
+        // Error animation
+        function showErrorAnimation() {
+            const passwordInput = document.getElementById("passwordInput");
+            passwordInput.classList.add("shake");
+            passwordInput.style.borderColor = "#ff4757";
+            setTimeout(() => {
+                passwordInput.classList.remove("shake");
+                passwordInput.style.borderColor = "transparent";
+            }, 500);
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            theme = theme === "dark" ? "light" : "dark";
+            const body = document.getElementById("mainBody");
+            const themeIcon = document.getElementById("themeIcon");
+            
+            if (theme === "light") {
+                body.classList.add("theme-light");
+                themeIcon.className = "fas fa-sun";
+                showNotification("☀️ Chuyển sang giao diện sáng", "info");
+            } else {
+                body.classList.remove("theme-light");
+                themeIcon.className = "fas fa-moon";
+                showNotification("🌙 Chuyển sang giao diện tối", "info");
+            }
+        }
+
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("show");
+        }
+
+        // Chat management
+        function newChat() {
+            currentChatId = generateId();
+            clearChatMessages();
+            attachedFiles = [];
+            
+            // Add welcome message
+            addBotMessage("🤖 AI Assistant", "Cuộc trò chuyện mới đã bắt đầu! Hãy hỏi tôi bất cứ điều gì. ✨");
+            
+            // Add to history
+            const chatData = {
+                id: currentChatId,
+                title: "Cuộc trò chuyện mới",
+                timestamp: new Date().toISOString(),
+                messages: []
+            };
+            
+            chatHistory.unshift(chatData);
+            updateChatHistoryUI();
+            setActiveChatInHistory(currentChatId);
+        }
+
+        function clearChat() {
+            if (currentChatId) {
+                clearChatMessages();
+                addBotMessage("🤖 AI Assistant", "Cuộc trò chuyện đã được xóa. Hãy bắt đầu câu hỏi mới! 🔄");
+                
+                // Update current chat in history
+                const chat = chatHistory.find(c => c.id === currentChatId);
+                if (chat) {
+                    chat.messages = [];
+                    chat.title = "Cuộc trò chuyện đã xóa";
+                }
+                updateChatHistoryUI();
+            }
+        }
+
+        function clearChatMessages() {
+            const chatMessages = document.getElementById("chatMessages");
+            chatMessages.innerHTML = "";
+        }
+
+        // Chat history management
+        function loadChatHistory() {
+            const stored = localStorage.getItem('chatHistory');
+            if (stored) {
+                chatHistory = JSON.parse(stored);
+            }
+        }
+
+        function saveChatHistory() {
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+        }
+
+        function updateChatHistoryUI() {
+            const historyContainer = document.getElementById("chatHistory");
+            historyContainer.innerHTML = "";
+            
+            chatHistory.forEach(chat => {
+                const historyItem = document.createElement("div");
+                historyItem.className = "history-item";
+                if (chat.id === currentChatId) {
+                    historyItem.classList.add("active");
+                }
+                
+                historyItem.innerHTML = `
+                    <div class="history-title">${chat.title}</div>
+                    <div class="history-time">${formatTime(chat.timestamp)}</div>
+                `;
+                
+                historyItem.onclick = () => loadChat(chat.id);
+                historyContainer.appendChild(historyItem);
+            });
+            
+            saveChatHistory();
+        }
+
+        function setActiveChatInHistory(chatId) {
+            const historyItems = document.querySelectorAll('.history-item');
+            historyItems.forEach(item => item.classList.remove('active'));
+            
+            const activeItem = Array.from(historyItems).find(item => {
+                const chat = chatHistory.find(c => c.id === chatId);
+                return chat && item.querySelector('.history-title').textContent === chat.title;
+            });
+            
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+        }
+
+        function loadChat(chatId) {
+            const chat = chatHistory.find(c => c.id === chatId);
+            if (!chat) return;
+            
+            currentChatId = chatId;
+            clearChatMessages();
+            
+            // Load messages
+            chat.messages.forEach(msg => {
+                if (msg.type === 'user') {
+                    addUserMessage(msg.content, msg.attachments);
+                } else {
+                    addBotMessage("🤖 AI", msg.content);
+                }
+            });
+            
+            setActiveChatInHistory(chatId);
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById("sidebar").classList.remove("show");
+            }
+        }
+
+        // Message handling
+        function addUserMessage(content, attachments = []) {
+            const chatMessages = document.getElementById("chatMessages");
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            
+            let messageHTML = `<div class="message-content"><strong>You:</strong> ${content}</div>`;
+            
+            if (attachments && attachments.length > 0) {
+                messageHTML += '<div class="message-attachments">';
+                attachments.forEach(attachment => {
+                    if (attachment.type === 'image') {
+                        messageHTML += `<img src="${attachment.data}" alt="Attached image" class="attachment-image">`;
+                    } else {
+                        messageHTML += `
+                            <div class="attachment-item">
+                                <i class="fas fa-file"></i>
+                                ${attachment.name}
+                            </div>
+                        `;
+                    }
+                });
+                messageHTML += '</div>';
+            }
+            
+            userMessage.innerHTML = messageHTML;
+            chatMessages.appendChild(userMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addBotMessage(sender, content) {
+            const chatMessages = document.getElementById("chatMessages");
+            const botMessage = document.createElement("div");
+            botMessage.className = "message bot";
+            botMessage.innerHTML = `
+                <div class="message-content"><strong>${sender}:</strong> ${content}</div>
+            `;
+            chatMessages.appendChild(botMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Add event listener for Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keydown', handleKeyPress);
+            }
+        });
+
+        // Typing indicator
+        function showTyping() {
+            document.getElementById("typingIndicator").style.display = "block";
+            const chatMessages = document.getElementById("chatMessages");
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            document.getElementById("typingIndicator").style.display = "none";
+        }
+
+        // File handling
+        function triggerFileInput() {
+            document.getElementById("fileInput").click();
+        }
+
+        function triggerImageInput() {
+            document.getElementById("imageInput").click();
+        }
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    showNotification("❌ File quá lớn (tối đa 10MB)", "error");
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    attachedFiles.push({
+                        name: file.name,
+                        type: 'file',
+                        data: e.target.result,
+                        size: file.size
+                    });
+                    showNotification(`📎 Đã đính kèm: ${file.name}`, "success");
+                };
+                reader.readAsText(file);
+            });
+            event.target.value = '';
+        }
+
+        function handleImageSelect(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit for images
+                    showNotification("❌ Ảnh quá lớn (tối đa 5MB)", "error");
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    attachedFiles.push({
+                        name: file.name,
+                        type: 'image',
+                        data: e.target.result
+                    });
+                    showNotification(`🖼️ Đã đính kèm ảnh: ${file.name}`, "success");
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        // Drag and drop
+        function setupDragAndDrop() {
+            const uploadOverlay = document.getElementById("uploadOverlay");
+            const chatScreen = document.getElementById("chatScreen");
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                document.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                document.addEventListener(eventName, () => {
+                    if (document.getElementById("chatScreen").style.display !== "none") {
+                        uploadOverlay.style.display = "flex";
+                    }
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                document.addEventListener(eventName, () => {
+                    uploadOverlay.style.display = "none";
+                });
+            });
+            
+            document.addEventListener('drop', handleDrop);
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const event = { target: { files: [file] } };
+                    handleImageSelect(event);
+                } else {
+                    const event = { target: { files: [file] } };
+                    handleFileSelect(event);
+                }
+            });
+        }
+
+        // Send message function
+        async function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+            
+            if (!message && attachedFiles.length === 0) return;
+
+            const sendBtn = document.getElementById("sendBtn");
+
+            // Add user message with attachments
+            addUserMessage(message || "Đã gửi file đính kèm", attachedFiles);
+
+            // Save to current chat history
+            if (currentChatId) {
+                const chat = chatHistory.find(c => c.id === currentChatId);
+                if (chat) {
+                    chat.messages.push({
+                        type: 'user',
+                        content: message || "Đã gửi file đính kèm",
+                        attachments: attachedFiles,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // Update chat title if it's the first message
+                    if (chat.messages.length === 1) {
+                        chat.title = message.substring(0, 30) + (message.length > 30 ? "..." : "");
+                        updateChatHistoryUI();
+                    }
+                }
+            }
+
+            // Prepare API request
+            let apiContent = message;
+            if (attachedFiles.length > 0) {
+                apiContent += "\n\n[Files attached: ";
+                attachedFiles.forEach(file => {
+                    if (file.type === 'image') {
+                        apiContent += `Image: ${file.name}; `;
+                    } else {
+                        apiContent += `File: ${file.name} - Content: ${file.data.substring(0, 1000)}...; `;
+                    }
+                });
+                apiContent += "]";
+            }
+
+            // Clear input and reset
+            messageInput.value = "";
+            messageInput.style.height = "auto";
+            attachedFiles = [];
+            sendBtn.disabled = true;
+            showTyping();
+
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{ 
+                                role: "user", 
+                                parts: [{ text: apiContent }] 
+                            }]
+                        })
+                    }
+                );
+
+                const data = await response.json();
+                let botReply = "⚠️ Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này.";
+                
+                if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    botReply = data.candidates[0].content.parts[0].text;
+                }
+
+                hideTyping();
+                addBotMessage("🤖 AI", botReply);
+
+                // Save bot response to history
+                if (currentChatId) {
+                    const chat = chatHistory.find(c => c.id === currentChatId);
+                    if (chat) {
+                        chat.messages.push({
+                            type: 'bot',
+                            content: botReply,
+                            timestamp: new Date().toISOString()
+                        });
+                        saveChatHistory();
+                    }
+                }
+
+            } catch (error) {
+                console.error("API Error:", error);
+                hideTyping();
+                
+                const errorMessage = "❌ Xin lỗi, đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại sau.";
+                addBotMessage("🤖 AI", errorMessage);
+                showNotification("Lỗi kết nối API!", "error");
+                
+                // Save error to history
+                if (currentChatId) {
+                    const chat = chatHistory.find(c => c.id === currentChatId);
+                    if (chat) {
+                        chat.messages.push({
+                            type: 'bot',
+                            content: errorMessage,
+                            timestamp: new Date().toISOString()
+                        });
+                        saveChatHistory();
+                    }
+                }
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // Utility functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return "Vừa xong";
+            if (diff < 3600000) return Math.floor(diff / 60000) + " phút trước";
+            if (diff < 86400000) return Math.floor(diff / 3600000) + " giờ trước";
+            return Math.floor(diff / 86400000) + " ngày trước";
+        }
+
+        function showNotification(message, type = "info") {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            
+            setTimeout(() => {
+                notification.classList.remove("show");
+            }, 3000);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.getElementById("sidebar").classList.remove("show");
+            }
+        });
+    </script>
+</body>
+</html>
