@@ -13,7 +13,7 @@
 
     <!-- Nhập mật khẩu -->
     <div class="password-box">
-      <input type="password" id="password" placeholder="Nhập mật khẩu...">
+      <input type="password" id="password" placeholder="🔑 Nhập mật khẩu...">
       <button onclick="checkPassword()">🔒 Vào chatbot riêng tư</button>
     </div>
 
@@ -26,16 +26,16 @@
   <script>
     function checkPassword() {
       const pw = document.getElementById("password").value;
-      // bạn đổi "123456" thành mật khẩu thật của bạn
+      // 👉 thay "123456" bằng mật khẩu thật
       if (pw === "123456") {
-        window.location.href = "/chat.html?mode=persona";
+        window.location.href = "chat.html?mode=persona";
       } else {
         alert("❌ Sai mật khẩu!");
       }
     }
 
     function enterGuest() {
-      window.location.href = "/chat.html?mode=guest";
+      window.location.href = "chat.html?mode=guest";
     }
   </script>
 </body>
