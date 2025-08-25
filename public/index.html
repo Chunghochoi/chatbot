@@ -1173,7 +1173,6 @@ Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc g
             const messageInput = document.getElementById('messageInput');
             messageInput.addEventListener('input', autoResize);
             messageInput.addEventListener('keydown', handleKeyPress);
-            messageInput.addEventListener('input', toggleMicOrSend);
 
             setupSpeechRecognition();
             toggleMicOrSend();
@@ -1596,7 +1595,17 @@ Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc g
             return div.innerHTML;
         }
 
+        /**
+         * MODIFIED FUNCTION
+         * This function now stops recording if the user presses any key.
+         */
         function handleKeyPress(event) {
+            // If the user starts typing or deleting text, stop the recording.
+            if (isRecording) {
+                stopRecording();
+            }
+
+            // Handle sending message with Enter key
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 sendMessage();
