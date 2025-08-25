@@ -1047,6 +1047,74 @@
         padding: 4px;
     }
 }
+.plus-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--glass-bg);
+    color: var(--neon-blue);
+    border-radius: 50%;
+    font-size: 1.2rem;
+    margin-right: 8px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+.attachment-options {
+    position: absolute;
+    left: 50px;
+    top: -50px;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 10;
+}
+.attachment-options .attach-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    padding: 6px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: left;
+}
+.attachment-options .attach-btn:hover {
+    background: var(--glass-border);
+}
+.mic-btn, .send-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--glass-bg);
+    color: var(--neon-blue);
+    border-radius: 50%;
+    font-size: 1.2rem;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+@media (max-width: 480px) {
+    .message-input {
+        min-height: 36px;
+        font-size: 0.95rem;
+        padding: 8px 10px;
+    }
+    .plus-btn, .mic-btn, .send-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        margin: 0 4px;
+    }
+    .attachment-options {
+        left: 36px;
+        top: -40px;
+        font-size: 0.95rem;
+    }
+}
     </style>
 </head>
 <body class="welcome-screen" id="mainBody">
@@ -1145,33 +1213,32 @@ Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc g
             </div>
 
             <div class="chat-input-container">
-                <div class="chat-input">
-                    <!-- File attachments preview -->
-                    <div class="file-attachments-preview" id="fileAttachmentsPreview">
-                        <!-- Attached files will appear here -->
-                    </div>
-                    
-                    <div class="input-wrapper">
-                        <textarea 
-                            class="message-input" 
-                            id="messageInput" 
-                            placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
-                            rows="1"
-                        ></textarea>
-                        <div class="input-actions">
-                            <button class="attach-btn" onclick="triggerFileInput()" title="Đính kèm file">
-                                <i class="fas fa-paperclip"></i>
-                            </button>
-                            <button class="attach-btn" onclick="triggerImageInput()" title="Đính kèm ảnh">
-                                <i class="fas fa-image"></i>
-                            </button>
-                        </div>
-                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
+    <div class="chat-input">
+        <div class="file-attachments-preview" id="fileAttachmentsPreview">
+            <!-- Attached files will appear here -->
+        </div>
+        <div class="input-wrapper">
+            <button class="plus-btn" id="plusBtn" onclick="toggleAttachmentOptions()">
+                <i class="fas fa-plus"></i>
+            </button>
+            <div class="attachment-options" id="attachmentOptions" style="display:none;">
+                <button class="attach-btn" onclick="triggerImageInput()">
+                    <i class="fas fa-image"></i> Ảnh
+                </button>
+                <button class="attach-btn" onclick="triggerFileInput()">
+                    <i class="fas fa-file"></i> File
+                </button>
             </div>
+            <textarea class="message-input" id="messageInput" placeholder="Nhập tin nhắn..." rows="1" oninput="handleInputChange()"></textarea>
+            <button class="mic-btn" id="micBtn" onclick="startVoiceInput()" style="display:block;">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" style="display:none;">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 
@@ -1847,6 +1914,59 @@ Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc g
                 document.getElementById("sidebar").classList.remove("show");
             }
         });
+        // Thêm vào cuối <script> hoặc sau các hàm khác
+
+// Xử lý hiện/ẩn nút mic/gửi
+function handleInputChange() {
+    const input = document.getElementById('messageInput');
+    const micBtn = document.getElementById('micBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    if (input.value.trim() === "") {
+        micBtn.style.display = "block";
+        sendBtn.style.display = "none";
+    } else {
+        micBtn.style.display = "none";
+        sendBtn.style.display = "block";
+    }
+}
+
+// Gộp nút cộng và hiện tùy chọn
+function toggleAttachmentOptions() {
+    const options = document.getElementById('attachmentOptions');
+    options.style.display = options.style.display === "none" ? "flex" : "none";
+    document.addEventListener('click', function hideOptions(e) {
+        if (!options.contains(e.target) && e.target.id !== "plusBtn") {
+            options.style.display = "none";
+            document.removeEventListener('click', hideOptions);
+        }
+    });
+}
+
+// Nhập giọng nói
+function startVoiceInput() {
+    if (!('webkitSpeechRecognition' in window)) {
+        showNotification("Trình duyệt không hỗ trợ nhập giọng nói!", "warning");
+        return;
+    }
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = 'vi-VN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('messageInput').value = transcript;
+        handleInputChange();
+    };
+    recognition.onerror = function(event) {
+        showNotification("Không nhận diện được giọng nói!", "danger");
+    };
+    recognition.start();
+}
+
+// Khởi tạo trạng thái nút khi load
+document.addEventListener('DOMContentLoaded', function() {
+    handleInputChange();
+});
     </script>
 </body>
 </html>
