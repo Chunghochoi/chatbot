@@ -3,54 +3,998 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot Pro | Gemini 2.5 Enhanced</title>
+    <title>Dev Chatbot | AI Assistant</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
-    <link href="./styles/main.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .model-selector-container {
+  display: flex;
+  align-items: center;
+  margin: 0 15px;
+}
+
+.model-label {
+  margin-right: 8px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.model-selector {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 6px 12px;
+  color: var(--text-light);
+  backdrop-filter: blur(10px);
+}
+
+.model-selector:focus {
+  outline: none;
+  border-color: var(--neon-blue);
+}
+
+.history-model {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #ffffff;
+            --text-dark: #2d3748;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --neon-blue: #00d4ff;
+            --neon-purple: #8b5cf6;
+            --terminal-green: #00ff41;
+            --danger: #ff4757;
+            --warning: #ffa502;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+            background: var(--dark-gradient);
+            color: var(--text-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-container {
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            max-width: 480px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--neon-blue), transparent);
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+
+        .welcome-container::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: var(--dark-gradient);
+            border-radius: 22px;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(79, 172, 254, 0.3));
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .auth-section {
+            margin: 2rem 0;
+        }
+
+        .password-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .password-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-blue);
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--success-gradient);
+            color: var(--text-light);
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-gradient);
+            color: var(--text-light);
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            margin: 2rem 0;
+            position: relative;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .divider span {
+            background: var(--dark-gradient);
+            padding: 0 1rem;
+        }
+
+        /* Chat Screen - FIXED LAYOUT */
+        .chat-screen {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            height: 100vh;
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .new-chat-btn {
+            padding: 8px 12px;
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .new-chat-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .history-item {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--neon-blue);
+        }
+
+        .history-item.active {
+            background: var(--success-gradient);
+            color: var(--text-light);
+        }
+
+        .history-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Main Chat Area - FIXED */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            min-width: 0; /* Important for flex shrinking */
+        }
+
+        .chat-header {
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            background: var(--terminal-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* FIXED CHAT MESSAGES CONTAINER */
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 16px 20px;
+            border-radius: 20px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--success-gradient);
+            color: var(--text-light);
+            border-bottom-right-radius: 8px;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            border-bottom-left-radius: 8px;
+        }
+
+        .message.bot::before {
+            content: '🤖';
+            position: absolute;
+            left: -12px;
+            top: -8px;
+            font-size: 1.2rem;
+            background: var(--dark-gradient);
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        .message-content {
+            line-height: 1.6;
+            white-space: pre-wrap; /* Preserve line breaks and spaces */
+        }
+
+        .message-attachments {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .attachment-item {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .attachment-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            border-bottom-left-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: typingDots 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingDots {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
+            40% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .chat-input-container {
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .chat-input {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* File attachments preview */
+        .file-attachments-preview {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-attachments-preview.show {
+            display: flex;
+        }
+
+        .file-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .file-preview-image {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .file-preview-name {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-remove-btn {
+            background: var(--danger);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+
+        .file-remove-btn:hover {
+            background: #dc3545;
+        }
+
+        /* FIXED INPUT WRAPPER - Main Fix Here */
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            width: 100%;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 24px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            resize: none;
+            max-height: 120px;
+            min-height: 56px;
+            width: 100%;
+            min-width: 0; /* Important for preventing overflow */
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* FIXED INPUT ACTIONS - Better positioning */
+        .input-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .attach-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .attach-btn:hover {
+            background: var(--neon-blue);
+            transform: scale(1.05);
+        }
+
+        .send-btn {
+            padding: 12px 16px;
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 20px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            height: 56px;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* File input */
+        .file-input {
+            display: none;
+        }
+
+        /* Upload area */
+        .upload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .upload-area {
+            padding: 40px;
+            border: 2px dashed var(--neon-blue);
+            border-radius: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--neon-blue);
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar,
+        .chat-history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track,
+        .chat-history::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb,
+        .chat-history::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .chat-history::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-purple);
+        }
+
+        /* Firefox scrollbar */
+        .chat-messages,
+        .chat-history {
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-blue) rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile toggle button */
+        .mobile-toggle {
+            display: none;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dark/Light theme toggle */
+        .theme-light {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-dark);
+        }
+
+        .theme-light .welcome-container::after,
+        .theme-light .divider span {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            background: var(--success-gradient);
+            color: var(--text-light);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Mobile responsiveness - IMPROVED */
+        @media (max-width: 768px) {
+            .welcome-container {
+                margin: 20px;
+                padding: 32px 24px;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .logo {
+                font-size: 3rem;
+            }
+
+            .chat-screen {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 100;
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar.collapsed {
+                width: 280px;
+                opacity: 1;
+                transform: translateX(-100%);
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .main-chat {
+                width: 100%;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .chat-messages {
+                padding: 16px;
+            }
+
+            .chat-input-container {
+                padding: 16px;
+            }
+
+            .chat-header {
+                padding: 16px 20px;
+            }
+
+            .chat-title {
+                font-size: 1.2rem;
+            }
+
+            /* MOBILE INPUT IMPROVEMENTS */
+            .input-wrapper {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .message-input {
+                padding: 12px 16px;
+                width: 100%;
+            }
+
+            .input-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .attach-btn {
+                width: 48px;
+                height: 48px;
+            }
+
+            .send-btn {
+                width: 80px;
+                height: 48px;
+            }
+
+            .file-preview-name {
+                max-width: 100px;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 480px) {
+            .input-wrapper {
+                flex-direction: row;
+                align-items: flex-end;
+                gap: 8px;
+            }
+
+            .message-input {
+                min-height: 44px;
+            }
+
+            .input-actions {
+                flex-direction: column;
+                width: auto;
+            }
+
+            .attach-btn {
+                width: 40px;
+                height: 40px;
+                padding: 8px;
+            }
+
+            .send-btn {
+                width: 50px;
+                height: 44px;
+                min-width: 50px;
+            }
+        }
+
+        /* Hide scrollbar for welcome screen */
+        .welcome-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
 </head>
+<div class="model-selector-container">
+  <span class="model-label">Model:</span>
+  <select id="modelSelector" class="model-selector" onchange="changeModel()">
+    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+    <option value="gemini-2.5-pro-preview">Gemini 2.5 Pro</option>
+  </select>
+</div>
 <body class="welcome-screen" id="mainBody">
-    <!-- Animated background -->
+    <!-- Animated background particles -->
     <div class="particles" id="particles"></div>
-    <div class="neural-network" id="neuralNetwork"></div>
 
     <!-- Welcome Screen -->
     <div class="welcome-container" id="welcomeScreen">
-        <div class="logo-container">
-            <div class="logo">🚀</div>
-            <div class="logo-rings">
-                <div class="ring ring-1"></div>
-                <div class="ring ring-2"></div>
-                <div class="ring ring-3"></div>
-            </div>
-        </div>
-        <h1 class="welcome-title">
-            <span class="gradient-text">AI Chatbot Pro</span>
-            <span class="version-badge">v2.5</span>
-        </h1>
-        <p class="welcome-subtitle">
-            Powered by <strong>Google Gemini 2.5 Pro</strong> - Trí tuệ nhân tạo thế hệ mới với khả năng hiểu đa phương tiện, 
-            xử lý code, phân tích dữ liệu và suy luận logic cao cấp.
-        </p>
-        
-        <div class="features-preview">
-            <div class="feature-item">
-                <i class="fas fa-brain"></i>
-                <span>Suy luận thông minh</span>
-            </div>
-            <div class="feature-item">
-                <i class="fas fa-code"></i>
-                <span>Code Generation</span>
-            </div>
-            <div class="feature-item">
-                <i class="fas fa-image"></i>
-                <span>Vision AI</span>
-            </div>
-            <div class="feature-item">
-                <i class="fas fa-language"></i>
-                <span>Multi-language</span>
-            </div>
-        </div>
+        <div class="logo">🤖</div>
+        <h1 class="welcome-title">Dev Chatbot</h1>
+        <p class="welcome-subtitle">Trợ lý AI thông minh dành cho developers. Chọn cách truy cập phù hợp với bạn.</p>
         
         <div class="auth-section">
             <div class="password-container">
@@ -59,16 +1003,11 @@
                     type="password" 
                     class="password-input" 
                     id="passwordInput" 
-                    placeholder="Nhập mật khẩu để truy cập bot nâng cao"
+                    placeholder="Nhập mật khẩu để truy cập bot riêng tư"
                 >
-                <div class="input-strength"></div>
             </div>
             <button class="btn btn-primary" onclick="enterPrivate()">
-                <span class="btn-content">
-                    <i class="fas fa-crown"></i>
-                    <span>Truy cập Pro Version</span>
-                </span>
-                <div class="btn-effect"></div>
+                <i class="fas fa-key"></i> Truy cập Bot Riêng tư
             </button>
         </div>
 
@@ -77,83 +1016,47 @@
         </div>
 
         <button class="btn btn-secondary" onclick="enterGuest()">
-            <span class="btn-content">
-                <i class="fas fa-user"></i>
-                <span>Dùng thử miễn phí</span>
-            </span>
+            <i class="fas fa-user"></i> Sử dụng như khách
         </button>
-
-        <div class="model-selector" id="modelSelector" style="display: none;">
-            <label class="model-label">Chọn AI Model:</label>
-            <select class="model-select" id="modelSelect">
-                <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Nhanh)</option>
-                <option value="gemini-1.5-pro" selected>Gemini 1.5 Pro (Cân bằng)</option>
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Tiết kiệm)</option>
-            </select>
-        </div>
     </div>
 
-    <!-- Chat Screen -->
+    <!-- Chat Screen (initially hidden) -->
     <div class="chat-screen" id="chatScreen" style="display: none;">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">
                     <i class="fas fa-history"></i>
-                    <span>Lịch sử Chat</span>
+                    Lịch sử
                 </div>
-                <div class="sidebar-actions">
-                    <button class="new-chat-btn" onclick="newChat()" title="Chat mới">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="action-btn-small" onclick="exportChats()" title="Xuất lịch sử">
-                        <i class="fas fa-download"></i>
-                    </button>
-                </div>
+                <button class="new-chat-btn" onclick="newChat()">
+                    <i class="fas fa-plus"></i> Mới
+                </button>
             </div>
             <div class="chat-history" id="chatHistory">
                 <!-- History items will be added here -->
-            </div>
-            <div class="sidebar-footer">
-                <div class="usage-stats" id="usageStats">
-                    <div class="stat-item">
-                        <span class="stat-label">Tokens sử dụng:</span>
-                        <span class="stat-value" id="tokenCount">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Chat hôm nay:</span>
-                        <span class="stat-value" id="todayChats">0</span>
-                    </div>
-                </div>
             </div>
         </div>
 
         <!-- Main Chat Area -->
         <div class="main-chat">
-            <!-- Enhanced Header -->
             <div class="chat-header">
                 <div class="chat-title">
                     <button class="mobile-toggle" onclick="toggleSidebar()">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <div class="ai-status">
-                        <div class="status-indicator pulsing"></div>
-                        <span id="chatTitle">🤖 AI Assistant Pro</span>
-                        <div class="model-info" id="currentModel">Gemini 1.5 Pro</div>
-                    </div>
+                    <div class="status-indicator"></div>
+                    <span id="chatTitle">💬 Chatbot</span>
                 </div>
                 <div class="header-actions">
-                    <button class="action-btn" onclick="toggleVoice()" title="Thoại" id="voiceBtn">
-                        <i class="fas fa-microphone"></i>
-                    </button>
                     <button class="action-btn" onclick="toggleTheme()" title="Đổi giao diện">
                         <i class="fas fa-moon" id="themeIcon"></i>
                     </button>
-                    <button class="action-btn" onclick="showSettings()" title="Cài đặt">
-                        <i class="fas fa-cog"></i>
-                    </button>
                     <button class="action-btn" onclick="clearChat()" title="Xóa cuộc trò chuyện">
                         <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="action-btn" onclick="newChat()" title="Trò chuyện mới">
+                        <i class="fas fa-refresh"></i>
                     </button>
                     <button class="action-btn" onclick="goBack()" title="Quay lại">
                         <i class="fas fa-arrow-left"></i>
@@ -161,197 +1064,48 @@
                 </div>
             </div>
 
-            <!-- Chat Messages -->
             <div class="chat-messages" id="chatMessages">
                 <div class="message bot">
-                    <div class="message-avatar">
-                        <div class="avatar-bot">🤖</div>
-                        <div class="online-dot"></div>
-                    </div>
-                    <div class="message-bubble">
-                        <div class="message-header">
-                            <span class="sender-name">AI Assistant Pro</span>
-                            <span class="model-badge">Gemini 2.5</span>
-                            <span class="timestamp">Vừa xong</span>
-                        </div>
-                        <div class="message-content">
-                            <div class="welcome-message">
-                                <h3>🚀 Chào mừng đến với AI Chatbot Pro!</h3>
-                                <p>Tôi được trang bị <strong>Gemini 2.5 Pro</strong> với những khả năng tiên tiến:</p>
-                                <ul>
-                                    <li><span class="feature-icon">🧠</span> Suy luận logic phức tạp</li>
-                                    <li><span class="feature-icon">👨‍💻</span> Lập trình và debug code</li>
-                                    <li><span class="feature-icon">🖼️</span> Phân tích hình ảnh chi tiết</li>
-                                    <li><span class="feature-icon">📊</span> Xử lý và phân tích dữ liệu</li>
-                                    <li><span class="feature-icon">🌍</span> Hỗ trợ đa ngôn ngữ</li>
-                                </ul>
-                                <p class="cta-text">Hãy bắt đầu bằng cách hỏi tôi bất cứ điều gì! ✨</p>
-                            </div>
-                        </div>
-                        <div class="message-actions">
-                            <button class="msg-action-btn" onclick="copyMessage(this)" title="Sao chép">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                            <button class="msg-action-btn" onclick="speakMessage(this)" title="Đọc to">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                        </div>
+                    <div class="message-content">
+                        <strong>🤖 AI Assistant:</strong> Chào mừng bạn! Tôi là trợ lý AI của các developers. 
+Hãy hỏi tôi bất cứ điều gì về lập trình, công nghệ, hoặc gửi ảnh/file để tôi phân tích! ⚡
                     </div>
                 </div>
             </div>
 
-            <!-- Enhanced Typing Indicator -->
             <div class="typing-indicator" id="typingIndicator">
-                <div class="message-avatar">
-                    <div class="avatar-bot">🤖</div>
-                </div>
-                <div class="typing-bubble">
-                    <div class="typing-animation">
-                        <div class="typing-dots">
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                        </div>
-                        <span class="typing-text">AI đang suy nghĩ...</span>
-                    </div>
+                <div class="typing-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
                 </div>
             </div>
 
-            <!-- Enhanced Input Area -->
             <div class="chat-input-container">
-                <!-- Suggestions -->
-                <div class="suggestion-chips" id="suggestionChips">
-                    <div class="chip" onclick="sendSuggestion(this)">💡 Viết code Python</div>
-                    <div class="chip" onclick="sendSuggestion(this)">🖼️ Phân tích hình ảnh</div>
-                    <div class="chip" onclick="sendSuggestion(this)">📊 Tạo biểu đồ</div>
-                    <div class="chip" onclick="sendSuggestion(this)">🧮 Giải toán</div>
-                    <div class="chip" onclick="sendSuggestion(this)">✍️ Viết văn</div>
-                </div>
-
                 <div class="chat-input">
-                    <!-- File Preview -->
-                    <div class="file-attachments-preview" id="fileAttachmentsPreview"></div>
-                    
-                    <!-- Voice Recording -->
-                    <div class="voice-recording" id="voiceRecording" style="display: none;">
-                        <div class="recording-animation">
-                            <div class="pulse-ring"></div>
-                            <div class="recording-icon">🎤</div>
-                        </div>
-                        <div class="recording-info">
-                            <span class="recording-text">Đang ghi âm...</span>
-                            <span class="recording-duration" id="recordingDuration">00:00</span>
-                        </div>
-                        <button class="stop-recording-btn" onclick="stopRecording()">
-                            <i class="fas fa-stop"></i>
-                        </button>
+                    <!-- File attachments preview -->
+                    <div class="file-attachments-preview" id="fileAttachmentsPreview">
+                        <!-- Attached files will appear here -->
                     </div>
                     
                     <div class="input-wrapper">
-                        <div class="input-container">
-                            <textarea 
-                                class="message-input enhanced-input" 
-                                id="messageInput" 
-                                placeholder="Nhập tin nhắn hoặc kéo thả file vào đây... (Enter để gửi, Shift+Enter để xuống dòng)"
-                                rows="1"
-                            ></textarea>
-                            <div class="input-enhancements">
-                                <div class="character-counter" id="charCounter">0</div>
-                                <div class="input-mode" id="inputMode">Text</div>
-                            </div>
-                        </div>
-                        
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                            rows="1"
+                        ></textarea>
                         <div class="input-actions">
-                            <div class="attachment-group">
-                                <button class="attach-btn" onclick="triggerFileInput()" title="Đính kèm file">
-                                    <i class="fas fa-paperclip"></i>
-                                </button>
-                                <button class="attach-btn" onclick="triggerImageInput()" title="Đính kèm ảnh">
-                                    <i class="fas fa-image"></i>
-                                </button>
-                                <button class="attach-btn" onclick="triggerCameraInput()" title="Chụp ảnh">
-                                    <i class="fas fa-camera"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="send-group">
-                                <button class="voice-btn" id="voiceModeBtn" onclick="toggleVoiceMode()" title="Chế độ thoại">
-                                    <i class="fas fa-microphone"></i>
-                                </button>
-                                <button class="send-btn enhanced-send" id="sendBtn" onclick="sendMessage()">
-                                    <div class="send-icon">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </div>
-                                    <div class="send-ripple"></div>
-                                </button>
-                            </div>
+                            <button class="attach-btn" onclick="triggerFileInput()" title="Đính kèm file">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="attach-btn" onclick="triggerImageInput()" title="Đính kèm ảnh">
+                                <i class="fas fa-image"></i>
+                            </button>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsModal" style="display: none;">
-        <div class="modal-content settings-modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-cog"></i> Cài đặt nâng cao</h2>
-                <button class="close-btn" onclick="closeSettings()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-section">
-                    <h3>🤖 AI Model</h3>
-                    <div class="setting-item">
-                        <label>Chọn Model:</label>
-                        <select id="modelSelectSetting" onchange="updateModel()">
-                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Thử nghiệm)</option>
-                            <option value="gemini-1.5-pro" selected>Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label>Nhiệt độ (Creativity):</label>
-                        <input type="range" id="temperatureSlider" min="0" max="1" step="0.1" value="0.7" oninput="updateTemperature(this.value)">
-                        <span id="temperatureValue">0.7</span>
-                    </div>
-                </div>
-                
-                <div class="setting-section">
-                    <h3>🎨 Giao diện</h3>
-                    <div class="setting-item">
-                        <label>Chế độ tối:</label>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="darkModeToggle" checked onchange="toggleTheme()">
-                            <label for="darkModeToggle"></label>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label>Hiệu ứng:</label>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="animationsToggle" checked onchange="toggleAnimations()">
-                            <label for="animationsToggle"></label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="setting-section">
-                    <h3>🔊 Âm thanh</h3>
-                    <div class="setting-item">
-                        <label>Đọc phản hồi:</label>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="ttsToggle" onchange="toggleTTS()">
-                            <label for="ttsToggle"></label>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label>Giọng đọc:</label>
-                        <select id="voiceSelect">
-                            <option value="vi-VN">Tiếng Việt</option>
-                            <option value="en-US">English</option>
-                        </select>
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -359,67 +1113,747 @@
     </div>
 
     <!-- File inputs -->
-    <input type="file" id="fileInput" class="file-input" multiple accept=".txt,.pdf,.doc,.docx,.json,.js,.py,.html,.css,.md,.csv,.xml" onchange="handleFileSelect(event)">
+    <input type="file" id="fileInput" class="file-input" multiple accept=".txt,.pdf,.doc,.docx,.json,.js,.py,.html,.css" onchange="handleFileSelect(event)">
     <input type="file" id="imageInput" class="file-input" multiple accept="image/*" onchange="handleImageSelect(event)">
-    <input type="file" id="cameraInput" class="file-input" accept="image/*" capture="camera" onchange="handleImageSelect(event)">
 
-    <!-- Enhanced Upload overlay -->
+    <!-- Upload overlay -->
     <div class="upload-overlay" id="uploadOverlay">
         <div class="upload-area">
-            <div class="upload-animation">
-                <div class="upload-icon">📁</div>
-                <div class="upload-rings">
-                    <div class="ring"></div>
-                    <div class="ring"></div>
-                </div>
-            </div>
+            <div class="upload-icon">📁</div>
             <h3>Thả file vào đây</h3>
-            <p>Hỗ trợ: Ảnh, Documents, Code files, Data files</p>
-            <div class="supported-formats">
-                <span class="format-tag">IMG</span>
-                <span class="format-tag">PDF</span>
-                <span class="format-tag">DOC</span>
-                <span class="format-tag">CODE</span>
-                <span class="format-tag">DATA</span>
+            <p>Hỗ trợ: Ảnh, Text, PDF, Code files</p>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+  // Global variables
+  const API_BASE_URL = window.location.origin;
+  let currentMode = "guest";
+  let theme = "dark";
+  let chatHistory = [];
+  let currentChatId = null;
+  let attachedFiles = [];
+  let availableModels = [];
+  let selectedModel = "gemini-2.0-flash";
+
+  // Initialize app
+  document.addEventListener('DOMContentLoaded', function() {
+    createParticles();
+    loadChatHistory();
+    setupDragAndDrop();
+    document.getElementById('passwordInput').focus();
+    loadAvailableModels();
+    
+    // Auto-resize textarea
+    const messageInput = document.getElementById('messageInput');
+    messageInput.addEventListener('input', autoResize);
+    messageInput.addEventListener('keydown', handleKeyPress);
+  });
+
+  // Load available models from server
+  async function loadAvailableModels() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/models`);
+      const data = await response.json();
+      availableModels = data.models;
+      selectedModel = data.defaultModel;
+      
+      // Update model selector if it exists
+      const modelSelector = document.getElementById('modelSelector');
+      if (modelSelector) {
+        modelSelector.innerHTML = '';
+        availableModels.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          option.selected = model === selectedModel;
+          modelSelector.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load models:", error);
+    }
+  }
+
+  // Create animated particles
+  function createParticles() {
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = Math.random() * 100 + '%';
+      particle.style.width = Math.random() * 4 + 2 + 'px';
+      particle.style.height = particle.style.width;
+      particle.style.animationDelay = Math.random() * 6 + 's';
+      particlesContainer.appendChild(particle);
+    }
+  }
+
+  // Auto-resize textarea
+  function autoResize() {
+    const textarea = document.getElementById('messageInput');
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+  }
+
+  // Authentication functions
+  function enterPrivate() {
+    const password = document.getElementById("passwordInput").value;
+    if (password === "12345") {
+      currentMode = "persona";
+      showChatScreen();
+      document.getElementById("chatTitle").innerHTML = '<i class="fas fa-lock"></i> Bot Riêng tư';
+      showNotification("✅ Đăng nhập thành công vào bot riêng tư!", "success");
+    } else {
+      showErrorAnimation();
+      showNotification("❌ Mật khẩu không chính xác!", "error");
+    }
+  }
+
+  function enterGuest() {
+    currentMode = "guest";
+    showChatScreen();
+    document.getElementById("chatTitle").innerHTML = '<i class="fas fa-user"></i> Bot Công khai';
+    showNotification("👤 Chế độ khách được kích hoạt", "info");
+  }
+
+  // Screen transition with proper cleanup
+  function showChatScreen() {
+    const welcomeScreen = document.getElementById("welcomeScreen");
+    const chatScreen = document.getElementById("chatScreen");
+    const mainBody = document.getElementById("mainBody");
+    
+    // Fade out welcome screen
+    welcomeScreen.style.opacity = "0";
+    welcomeScreen.style.transform = "scale(0.95)";
+    
+    setTimeout(() => {
+      welcomeScreen.style.display = "none";
+      chatScreen.style.display = "flex";
+      mainBody.className = "chat-screen";
+      
+      // Fade in chat screen
+      chatScreen.style.opacity = "0";
+      setTimeout(() => {
+        chatScreen.style.opacity = "1";
+        chatScreen.style.transform = "scale(1)";
+        document.getElementById("messageInput").focus();
+        newChat(); // Start with a new chat
+      }, 50);
+    }, 300);
+  }
+
+  function goBack() {
+    const welcomeScreen = document.getElementById("welcomeScreen");
+    const chatScreen = document.getElementById("chatScreen");
+    const mainBody = document.getElementById("mainBody");
+    
+    // Fade out chat screen
+    chatScreen.style.opacity = "0";
+    chatScreen.style.transform = "scale(0.95)";
+    
+    setTimeout(() => {
+      chatScreen.style.display = "none";
+      welcomeScreen.style.display = "flex";
+      mainBody.className = "welcome-screen";
+      
+      // Reset form
+      document.getElementById("passwordInput").value = "";
+      
+      // Fade in welcome screen
+      welcomeScreen.style.opacity = "0";
+      setTimeout(() => {
+        welcomeScreen.style.opacity = "1";
+        welcomeScreen.style.transform = "scale(1)";
+        document.getElementById("passwordInput").focus();
+      }, 50);
+    }, 300);
+  }
+
+  // Error animation
+  function showErrorAnimation() {
+    const passwordInput = document.getElementById("passwordInput");
+    passwordInput.classList.add("shake");
+    passwordInput.style.borderColor = "#ff4757";
+    setTimeout(() => {
+      passwordInput.classList.remove("shake");
+      passwordInput.style.borderColor = "transparent";
+    }, 500);
+  }
+
+  // Theme toggle
+  function toggleTheme() {
+    theme = theme === "dark" ? "light" : "dark";
+    const body = document.getElementById("mainBody");
+    const themeIcon = document.getElementById("themeIcon");
+    
+    if (theme === "light") {
+      body.classList.add("theme-light");
+      themeIcon.className = "fas fa-sun";
+      showNotification("☀️ Chuyển sang giao diện sáng", "info");
+    } else {
+      body.classList.remove("theme-light");
+      themeIcon.className = "fas fa-moon";
+      showNotification("🌙 Chuyển sang giao diện tối", "info");
+    }
+  }
+
+  // Sidebar functions
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("show");
+  }
+
+  // Model selection
+  function changeModel() {
+    const modelSelector = document.getElementById('modelSelector');
+    if (modelSelector) {
+      selectedModel = modelSelector.value;
+      showNotification(`🤖 Đã chuyển sang model: ${selectedModel}`, "info");
+    }
+  }
+
+  // Chat management
+  function newChat() {
+    currentChatId = generateId();
+    clearChatMessages();
+    clearAttachedFiles();
+    
+    // Add welcome message
+    addBotMessage("🤖 AI Assistant", "Cuộc trò chuyện mới đã bắt đầu! Hãy hỏi tôi bất cứ điều gì. ✨");
+    
+    // Add to history
+    const chatData = {
+      id: currentChatId,
+      title: "Cuộc trò chuyện mới",
+      timestamp: new Date().toISOString(),
+      messages: [],
+      model: selectedModel
+    };
+    
+    chatHistory.unshift(chatData);
+    updateChatHistoryUI();
+    setActiveChatInHistory(currentChatId);
+  }
+
+  function clearChat() {
+    if (currentChatId) {
+      clearChatMessages();
+      clearAttachedFiles();
+      addBotMessage("🤖 AI Assistant", "Cuộc trò chuyện đã được xóa. Hãy bắt đầu câu hỏi mới! 🔄");
+      
+      // Update current chat in history
+      const chat = chatHistory.find(c => c.id === currentChatId);
+      if (chat) {
+        chat.messages = [];
+        chat.title = "Cuộc trò chuyện đã xóa";
+      }
+      updateChatHistoryUI();
+    }
+  }
+
+  function clearChatMessages() {
+    const chatMessages = document.getElementById("chatMessages");
+    chatMessages.innerHTML = "";
+  }
+
+  function clearAttachedFiles() {
+    attachedFiles = [];
+    updateFilePreview();
+  }
+
+  // Chat history management
+  function loadChatHistory() {
+    const savedHistory = localStorage.getItem('chatHistory');
+    if (savedHistory) {
+      try {
+        chatHistory = JSON.parse(savedHistory);
+        updateChatHistoryUI();
+      } catch (e) {
+        console.error("Error loading chat history:", e);
+        chatHistory = [];
+      }
+    } else {
+      chatHistory = [];
+    }
+  }
+
+  function saveChatHistory() {
+    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  }
+
+  function updateChatHistoryUI() {
+    const historyContainer = document.getElementById("chatHistory");
+    historyContainer.innerHTML = "";
+    
+    chatHistory.forEach(chat => {
+      const historyItem = document.createElement("div");
+      historyItem.className = "history-item";
+      if (chat.id === currentChatId) {
+        historyItem.classList.add("active");
+      }
+      
+      historyItem.innerHTML = `
+        <div class="history-title">${chat.title}</div>
+        <div class="history-time">${formatTime(chat.timestamp)}</div>
+        <div class="history-model">${chat.model || 'gemini-2.0-flash'}</div>
+      `;
+      
+      historyItem.onclick = () => loadChat(chat.id);
+      historyContainer.appendChild(historyItem);
+    });
+    
+    saveChatHistory();
+  }
+
+  function setActiveChatInHistory(chatId) {
+    const historyItems = document.querySelectorAll('.history-item');
+    historyItems.forEach(item => item.classList.remove('active'));
+    
+    const activeItem = Array.from(historyItems).find(item => {
+      const chat = chatHistory.find(c => c.id === chatId);
+      return chat && item.querySelector('.history-title').textContent === chat.title;
+    });
+    
+    if (activeItem) {
+      activeItem.classList.add('active');
+    }
+  }
+
+  function loadChat(chatId) {
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (!chat) return;
+    
+    currentChatId = chatId;
+    selectedModel = chat.model || "gemini-2.0-flash";
+    clearChatMessages();
+    clearAttachedFiles();
+    
+    // Update model selector if it exists
+    const modelSelector = document.getElementById('modelSelector');
+    if (modelSelector) {
+      modelSelector.value = selectedModel;
+    }
+    
+    // Load messages
+    chat.messages.forEach(msg => {
+      if (msg.type === 'user') {
+        addUserMessage(msg.content, msg.attachments);
+      } else {
+        addBotMessage("🤖 AI", msg.content);
+      }
+    });
+    
+    setActiveChatInHistory(chatId);
+    
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+      document.getElementById("sidebar").classList.remove("show");
+    }
+  }
+
+  // Message handling with proper formatting
+  function addUserMessage(content, attachments = []) {
+    const chatMessages = document.getElementById("chatMessages");
+    const userMessage = document.createElement("div");
+    userMessage.className = "message user";
+    
+    let messageHTML = `<div class="message-content"><strong>You:</strong> ${escapeHtml(content)}</div>`;
+    
+    if (attachments && attachments.length > 0) {
+      messageHTML += '<div class="message-attachments">';
+      attachments.forEach(attachment => {
+        if (attachment.type === 'image') {
+          messageHTML += `<img src="${attachment.data}" alt="Attached image" class="attachment-image">`;
+        } else {
+          messageHTML += `
+            <div class="attachment-item">
+              <i class="fas fa-file"></i>
+              ${escapeHtml(attachment.name)}
             </div>
-        </div>
-    </div>
+          `;
+        }
+      });
+      messageHTML += '</div>';
+    }
+    
+    userMessage.innerHTML = messageHTML;
+    chatMessages.appendChild(userMessage);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 
-    <!-- Enhanced notification -->
-    <div class="notification" id="notification">
-        <div class="notification-content">
-            <div class="notification-icon"></div>
-            <div class="notification-text"></div>
-        </div>
-        <div class="notification-progress"></div>
-    </div>
+  function addBotMessage(sender, content) {
+    const chatMessages = document.getElementById("chatMessages");
+    const botMessage = document.createElement("div");
+    botMessage.className = "message bot";
+    
+    // Format the bot response properly
+    const formattedContent = formatBotMessage(content);
+    
+    botMessage.innerHTML = `
+      <div class="message-content"><strong>${escapeHtml(sender)}:</strong> ${formattedContent}</div>
+    `;
+    chatMessages.appendChild(botMessage);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 
-    <!-- Loading overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="loading-content">
-            <div class="loading-animation">
-                <div class="loading-brain">🧠</div>
-                <div class="loading-waves">
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                </div>
-            </div>
-            <div class="loading-text">AI đang xử lý...</div>
-        </div>
-    </div>
+  // Format bot messages to handle markdown-like formatting
+  function formatBotMessage(content) {
+    let formatted = escapeHtml(content);
+    
+    // Handle bold text **text**
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Handle italic text *text*
+    formatted = formatted.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>');
+    
+    // Handle code blocks ```code```
+    formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; margin: 8px 0; overflow-x: auto;"><code>$1</code></pre>');
+    
+    // Handle inline code `code`
+    formatted = formatted.replace(/`([^`]+?)`/g, '<code style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px; font-family: monospace;">$1</code>');
+    
+    // Handle line breaks
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    return formatted;
+  }
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
-    <script src="./scripts/config.js"></script>
-    <script src="./scripts/ai-engine.js"></script>
-    <script src="./scripts/voice-handler.js"></script>
-    <script src="./scripts/file-handler.js"></script>
-    <script src="./scripts/ui-manager.js"></script>
-    <script src="./scripts/chat-manager.js"></script>
-    <script src="./scripts/main.js"></script>
+  // Escape HTML to prevent XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Handle Enter key
+  function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  }
+
+  // Typing indicator
+  function showTyping() {
+    document.getElementById("typingIndicator").style.display = "block";
+    const chatMessages = document.getElementById("chatMessages");
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideTyping() {
+    document.getElementById("typingIndicator").style.display = "none";
+  }
+
+  // File handling with preview
+  function triggerFileInput() {
+    document.getElementById("fileInput").click();
+  }
+
+  function triggerImageInput() {
+    document.getElementById("imageInput").click();
+  }
+
+  function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    files.forEach(file => {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        showNotification("❌ File quá lớn (tối đa 10MB)", "error");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        attachedFiles.push({
+          name: file.name,
+          type: 'file',
+          data: e.target.result,
+          size: file.size,
+          fileObject: file // Keep reference for FormData
+        });
+        updateFilePreview();
+        showNotification(`📎 Đã đính kèm: ${file.name}`, "success");
+      };
+      reader.readAsDataURL(file);
+    });
+    event.target.value = '';
+  }
+
+  function handleImageSelect(event) {
+    const files = Array.from(event.target.files);
+    files.forEach(file => {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit for images
+        showNotification("❌ Ảnh quá lớn (tối đa 5MB)", "error");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        attachedFiles.push({
+          name: file.name,
+          type: 'image',
+          data: e.target.result,
+          fileObject: file // Keep reference for FormData
+        });
+        updateFilePreview();
+        showNotification(`🖼️ Đã đính kèm ảnh: ${file.name}`, "success");
+      };
+      reader.readAsDataURL(file);
+    });
+    event.target.value = '';
+  }
+
+  // Update file preview display
+  function updateFilePreview() {
+    const preview = document.getElementById('fileAttachmentsPreview');
+    
+    if (attachedFiles.length === 0) {
+      preview.classList.remove('show');
+      preview.innerHTML = '';
+      return;
+    }
+    
+    preview.classList.add('show');
+    preview.innerHTML = '';
+    
+    attachedFiles.forEach((file, index) => {
+      const fileItem = document.createElement('div');
+      fileItem.className = 'file-preview-item';
+      
+      if (file.type === 'image') {
+        fileItem.innerHTML = `
+          <img src="${file.data}" alt="${file.name}" class="file-preview-image">
+          <span class="file-preview-name">${file.name}</span>
+          <button class="file-remove-btn" onclick="removeAttachedFile(${index})">×</button>
+        `;
+      } else {
+        fileItem.innerHTML = `
+          <i class="fas fa-file"></i>
+          <span class="file-preview-name">${file.name}</span>
+          <button class="file-remove-btn" onclick="removeAttachedFile(${index})">×</button>
+        `;
+      }
+      
+      preview.appendChild(fileItem);
+    });
+  }
+
+  // Remove attached file
+  function removeAttachedFile(index) {
+    attachedFiles.splice(index, 1);
+    updateFilePreview();
+    showNotification("🗑️ Đã xóa file đính kèm", "info");
+  }
+
+  // Drag and drop
+  function setupDragAndDrop() {
+    const uploadOverlay = document.getElementById("uploadOverlay");
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      document.addEventListener(eventName, () => {
+        if (document.getElementById("chatScreen").style.display !== "none") {
+          uploadOverlay.style.display = "flex";
+        }
+      });
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, () => {
+        uploadOverlay.style.display = "none";
+      });
+    });
+    
+    document.addEventListener('drop', handleDrop);
+  }
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    Array.from(files).forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const event = { target: { files: [file] } };
+        handleImageSelect(event);
+      } else {
+        const event = { target: { files: [file] } };
+        handleFileSelect(event);
+      }
+    });
+  }
+
+  // Send message function
+  async function sendMessage() {
+    const messageInput = document.getElementById("messageInput");
+    const message = messageInput.value.trim();
+    
+    if (!message && attachedFiles.length === 0) return;
+
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Add user message with attachments
+    addUserMessage(message || "Đã gửi file đính kèm", [...attachedFiles]);
+
+    // Save to current chat history
+    if (currentChatId) {
+      const chat = chatHistory.find(c => c.id === currentChatId);
+      if (chat) {
+        chat.messages.push({
+          type: 'user',
+          content: message || "Đã gửi file đính kèm",
+          attachments: [...attachedFiles],
+          timestamp: new Date().toISOString()
+        });
+        
+        // Update chat title if it's the first message
+        if (chat.messages.length === 1) {
+          chat.title = message.substring(0, 30) + (message.length > 30 ? "..." : "");
+          chat.model = selectedModel;
+          updateChatHistoryUI();
+        }
+      }
+    }
+
+    // Clear input and reset
+    messageInput.value = "";
+    messageInput.style.height = "auto";
+    const filesToSend = [...attachedFiles];
+    clearAttachedFiles();
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      // Prepare FormData for file uploads
+      const formData = new FormData();
+      formData.append("message", message);
+      formData.append("model", selectedModel);
+      
+      // Add files to FormData
+      filesToSend.forEach(file => {
+        if (file.fileObject) {
+          formData.append("files", file.fileObject);
+        }
+      });
+      
+      // Add chat history for context
+      if (currentChatId) {
+        const chat = chatHistory.find(c => c.id === currentChatId);
+        if (chat) {
+          formData.append("chatHistory", JSON.stringify(chat.messages));
+        }
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to get response");
+      }
+
+      hideTyping();
+      addBotMessage("🤖 AI", data.response);
+
+      // Save bot response to history
+      if (currentChatId) {
+        const chat = chatHistory.find(c => c.id === currentChatId);
+        if (chat) {
+          chat.messages.push({
+            type: 'bot',
+            content: data.response,
+            timestamp: new Date().toISOString()
+          });
+          saveChatHistory();
+        }
+      }
+
+      showNotification(`✅ Phản hồi từ ${selectedModel}`, "success");
+
+    } catch (error) {
+      console.error("API Error:", error);
+      hideTyping();
+      
+      const errorMessage = "❌ Xin lỗi, đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại sau.";
+      addBotMessage("🤖 AI", errorMessage);
+      showNotification(`Lỗi: ${error.message}`, "error");
+      
+      // Save error to history
+      if (currentChatId) {
+        const chat = chatHistory.find(c => c.id === currentChatId);
+        if (chat) {
+          chat.messages.push({
+            type: 'bot',
+            content: errorMessage,
+            timestamp: new Date().toISOString()
+          });
+          saveChatHistory();
+        }
+      }
+    } finally {
+      sendBtn.disabled = false;
+      messageInput.focus();
+    }
+  }
+
+  // Utility functions
+  function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return "Vừa xong";
+    if (diff < 3600000) return Math.floor(diff / 60000) + " phút trước";
+    if (diff < 86400000) return Math.floor(diff / 3600000) + " giờ trước";
+    return Math.floor(diff / 86400000) + " ngày trước";
+  }
+
+  function showNotification(message, type = "info") {
+    const notification = document.getElementById("notification");
+    notification.textContent = message;
+    notification.className = `notification show ${type}`;
+    
+    setTimeout(() => {
+      notification.classList.remove("show");
+    }, 3000);
+  }
+
+  // Handle window resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      document.getElementById("sidebar").classList.remove("show");
+    }
+    
+    // Update model selector visibility
+    const modelSelector = document.getElementById('modelSelector');
+    if (modelSelector) {
+      if (window.innerWidth < 500) {
+        modelSelector.style.display = 'none';
+        document.querySelector('.model-label').style.display = 'none';
+      } else {
+        modelSelector.style.display = 'block';
+        document.querySelector('.model-label').style.display = 'block';
+      }
+    }
+  });
+    </script>
 </body>
 </html>
