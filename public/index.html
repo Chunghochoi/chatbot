@@ -944,6 +944,109 @@
         .shake {
             animation: shake 0.5s ease-in-out;
         }
+        /* Thêm vào cuối file <style> trong index.html */
+
+/* Giao diện cho màn hình nhỏ hơn 768px */
+@media (max-width: 768px) {
+    .welcome-container {
+        padding: 24px 10px;
+        max-width: 98vw;
+    }
+    .logo {
+        font-size: 2.5rem;
+    }
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+    .chat-screen {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100vw;
+        height: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        transition: all 0.3s;
+    }
+    .sidebar.collapsed {
+        display: none;
+    }
+    .main-chat {
+        height: calc(100vh - 60px);
+        margin-top: 60px;
+    }
+    .chat-header {
+        padding: 12px 10px;
+        font-size: 1rem;
+    }
+    .chat-messages {
+        padding: 12px 6px;
+        gap: 10px;
+    }
+    .message {
+        font-size: 0.95rem;
+        padding: 10px 12px;
+        max-width: 98vw;
+    }
+    .chat-input-container {
+        padding: 12px 6px;
+    }
+    .input-wrapper {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .message-input {
+        min-height: 44px;
+        font-size: 0.95rem;
+    }
+    .input-actions {
+        gap: 6px;
+    }
+    .attach-btn, .send-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        padding: 8px;
+    }
+    .file-preview-name {
+        max-width: 90px;
+        font-size: 0.85rem;
+    }
+    .mobile-toggle {
+        display: block;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 20;
+    }
+}
+
+/* Giao diện cho màn hình rất nhỏ hơn 480px */
+@media (max-width: 480px) {
+    .welcome-container {
+        padding: 12px 2px;
+    }
+    .chat-header, .chat-input-container {
+        padding: 8px 2px;
+    }
+    .message {
+        font-size: 0.9rem;
+        padding: 8px 8px;
+    }
+    .file-preview-name {
+        max-width: 60px;
+    }
+    .attach-btn, .send-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        padding: 4px;
+    }
+}
     </style>
 </head>
 <body class="welcome-screen" id="mainBody">
